@@ -63,9 +63,23 @@ Complete a month cost analysis of each Azure resource to give an estimate total 
 
 | Azure Resource | Service Tier | Monthly Cost |
 | ------------ | ------------ | ------------ |
-| *Azure Postgres Database* |     |              |
-| *Azure Service Bus*   |         |              |
-| ...                   |         |              |
+| *Azure Postgres Database* |   Basic  |     $25.32    |
+| *Azure Service Bus*   |   Basic      |      $0.05/MILLION/MONTH        |
+| *Azure Function*   |    Consumption (Serverless)     |     Less than $0.41/MONTH (base on my using on May/2023)        |
+| *Azure Storage Account*   |      Standard - Cold   |         $1.78/MONTH (base on my using on April/2023)     |
+| *Azure App Service*   |    F1     |     Free         |
 
 ## Architecture Explanation
-This is a placeholder section where you can provide an explanation and reasoning for your architecture selection for both the Azure Web App and Azure Function.
+Explanation and reasoning for my architecture selection:
+
+Azure Web App:
+   - Suitable for hosting traditional web applications.
+   - Offers scalability, built-in web application features, and stateful application support.
+   - Compatible with various programming languages and frameworks.
+
+Azure Function:
+   - Ideal for event-driven scenarios and serverless architecture.
+   - Works well for microservices, APIs, and serverless workflows.
+   - Provides automatic scaling, event-driven triggers, and cost efficiency.
+
+In summary, Azure Web App is a good choice for traditional web applications, while Azure Function is suitable for event-driven workloads and serverless architecture.
