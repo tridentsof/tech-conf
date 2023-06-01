@@ -20,7 +20,7 @@ def main(msg: func.ServiceBusMessage):
         logging.info('Start get notification by notification_id')
 
         cursor = connection.cursor()
-        get_notificcation_query = "SELECT message, subject FROM notification WHERE ID = {0}".format(str(notification_id))
+        get_notificcation_query = "SELECT message, subject FROM public.notification WHERE ID = {0}".format(str(notification_id))
         cursor.execute(get_notificcation_query)
         notifications = cursor.fetchall()
 
@@ -33,7 +33,7 @@ def main(msg: func.ServiceBusMessage):
         # TODO: Get attendees email and name
         logging.info('Start get attendees email and name')
 
-        get_attendee_query = "SELECT first_name, email FROM attendee"
+        get_attendee_query = "SELECT first_name, email FROM public.attendee"
         cursor.execute(get_attendee_query)
         attendees = cursor.fetchall()
 
@@ -55,8 +55,11 @@ def main(msg: func.ServiceBusMessage):
         connection.close()
 
 def send_mail_to_attendees(email_to, subject, message, attendee_name):
+    email_from = os.environ.get('SENDGRID_EMAIL_FROM')
+    logging.info('Email from: {0}'.format(str(email_from)))
+
     message = Mail(
-        from_email='tridp.it@gmail.com',
+        from_email=str(email_from),
         to_emails=email_to,
         subject=subject + ' ' + attendee_name,
         html_content=message
@@ -74,8 +77,12 @@ def send_mail_to_attendees(email_to, subject, message, attendee_name):
 def update_notification_records(connection, cursor, total_attendees, notification_id):
     try:
         current_date = datetime.now()
-        update_notification_query = 'UPDATE notification SET status = Number of attendees notified: {0} , completed_date = {1} WHERE notification_id = {2}'.format(total_attendees, current_date, notification_id)
-        cursor.excute(update_notification_query)
+        update_notification_query = ("update public.notification " 
+                      "SET STATUS = 'Number of attendees notified " + str(total_attendees) + "',"
+                      "COMPLETED_DATE = '" + str(current_date) + "'"
+                      "WHERE ID = " + str(notification_id))
+        
+        cursor.execute(update_notification_query)
         connection.commit()
     except Exception as e:
         logging.error(e)
