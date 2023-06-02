@@ -62,24 +62,46 @@ You will need to install the following locally:
 Complete a month cost analysis of each Azure resource to give an estimate total cost using the table below:
 
 | Azure Resource | Service Tier | Monthly Cost |
+
 | ------------ | ------------ | ------------ |
-| *Azure Postgres Database* |   Basic  |     $25.32    |
-| *Azure Service Bus*   |   Basic      |      $0.05/MILLION/MONTH        |
-| *Azure Function*   |    Consumption (Serverless)     |     Less than $0.41/MONTH (base on my using on May/2023)        |
-| *Azure Storage Account*   |      Standard - Cold   |         $1.78/MONTH (base on my using on April/2023)     |
-| *Azure App Service*   |    F1     |     Free         |
 
-## Architecture Explanation
+| *Azure Postgres Database* |   General Purpose - D4ds5, 4 vCore     $259.88/Month    |
+
+| *Azure Service Bus*   |   Standard      |      $9.81/Million/Month  |
+
+| *Azure Function*   |    Consumption (Serverless)     |    $1.80/Million Execution/Month        |
+
+| *Azure Storage Account*   |      Premium - Hot   |         $150.90/Month    |
+
+| *Azure App Service*   |    Premium V2 2Core(s), 7 GB RAM, 250 GB Storage     |    $168.63/Month         |
+
 Explanation and reasoning for my architecture selection:
+### Azure Web App:
 
-Azure Web App:
-   - Suitable for hosting traditional web applications.
-   - Offers scalability, built-in web application features, and stateful application support.
-   - Compatible with various programming languages and frameworks.
+Drawbacks:
 
-Azure Function:
-   - Ideal for event-driven scenarios and serverless architecture.
-   - Works well for microservices, APIs, and serverless workflows.
-   - Provides automatic scaling, event-driven triggers, and cost efficiency.
+    - Long-running operations: If my web application performs time-consuming tasks, such as large file uploads, extensive database operations, or external API calls, it may exceed the default timeout duration (Azure Web App has timeout of 230 seconds for incoming requests)
 
-In summary, Azure Web App is a good choice for traditional web applications, while Azure Function is suitable for event-driven workloads and serverless architecture.
+    - Resource limitations: If my web application performs time-consuming tasks, such as large file uploads, extensive database operations, or external API calls, it may exceed the default timeout duration
+
+    - Network issues: Timeout errors can also arise due to network connectivity problems. If there are network disruptions or delays between the client, Azure Web App, and any external dependencies, the request may exceed the timeout threshold.
+
+### Azure Function:
+
+Advantanges:
+
+    - Reliable message delivery: Service Bus Queue provides reliable message delivery. Once a message is sent to the queue, it is stored safely until it is successfully processed by a receiver. This ensures that mail sending requests are not lost or discarded, even if there are temporary failures or downtime in the web app or the mail sending service.
+
+    - Scalability and load balancing: The decoupling provided by the Service Bus Queue allows for horizontal scaling of the web app. Multiple instances of the web app can send messages to the queue concurrently, and the messages will be distributed across the available receivers. This enables efficient load balancing and helps handle increased message traffic or sudden bursts in demand.
+
+    - Asynchronous processing: By utilizing a Service Bus Queue, the web app can offload the time-consuming task of sending emails to a separate component or service. This asynchronous processing frees up resources in the web app, allowing it to handle more requests and respond faster to user interactions.
+
+Drawbacks:
+
+    - Execution time limits: Azure Functions have execution time limits depending on the hosting plan and runtime version. If your function takes longer to execute than the allowed time, it can result in an HTTP timeout error. For example, the default execution timeout for consumption plan functions is 5 minutes.
+
+    - Resource constraints: Functions hosted on lower-tier plans or with limited allocated resources may struggle to handle longer or resource-intensive operations within the specified timeout duration. Upgrading to a higher-tier plan or adjusting resource allocations can help address this issue.
+
+    - External dependencies: If your function relies on external services, such as databases, APIs, or other services, delays or network connectivity issues with those dependencies can lead to timeout errors. Ensure that your function handles such scenarios gracefully and has appropriate error handling mechanisms.
+
+-> In summary, Azure Web App is suitable for hosting web applications but may face issues with long-running operations and potential timeout errors. Azure Function offers advantages such as reliable message delivery, scalability, and asynchronous processing. However, it has execution time limits and resource constraints. Consider your specific application requirements to choose the most appropriate option.
